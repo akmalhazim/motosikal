@@ -5,6 +5,6 @@ WORKDIR /app
 COPY . .
 RUN go build .
 
-EXPOSE 3500
+EXPOSE 8000
 
 CMD ["./motosikal"]

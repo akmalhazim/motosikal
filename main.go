@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,6 +17,12 @@ type WsMsg struct {
 	Data string `json:"data"`
 }
 
+type CreateSurveyRequest struct {
+	RespondentName  string `json:"respondentName"`
+	RespondentEmail string `json:"respondentEmail"`
+	RespondentPhone string `json:"respondentPhone"`
+}
+
 type CreateRecordRequest struct {
 	Lat       float32    `json:"lat"`
 	Lng       float32    `json:"lng"`
@@ -24,6 +31,8 @@ type CreateRecordRequest struct {
 
 var (
 	CreateRecordOp = 1
+
+	ErrSocketClosed = errors.New("socket closed")
 )
 
 func main() {
@@ -46,7 +55,7 @@ func main() {
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
-				handleWsErr(conn, err)
+				handleWsErr(conn, ErrSocketClosed)
 				break
 			}
 
@@ -78,6 +87,15 @@ func main() {
 		return nil
 	})
 
+	e.POST("/surveys", func(c echo.Context) error {
+		req := new(CreateSurveyRequest)
+		if err := c.Bind(req); err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, req)
+	})
+
 	e.POST("/records", func(c echo.Context) error {
 		req := new(CreateRecordRequest)
 		if err := c.Bind(req); err != nil {
@@ -87,5 +105,5 @@ func main() {
 		return c.JSON(http.StatusOK, req)
 	})
 
-	e.Logger.Error(e.Start("0.0.0.0:3500"))
+	e.Logger.Error(e.Start("0.0.0.0:8000"))
 }
