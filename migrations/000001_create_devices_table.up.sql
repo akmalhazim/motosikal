@@ -3,4 +3,3 @@ CREATE TABLE `devices` (
     `name` VARCHAR(255) NOT NULL,
     `last_ping` TIMESTAMP
 );
-

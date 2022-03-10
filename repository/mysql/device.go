@@ -3,7 +3,6 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/akmalhazim/motosikal/models"
 )
@@ -33,8 +32,10 @@ func (repo *deviceRepo) List(ctx context.Context) ([]*models.Device, error) {
 	return devices, nil
 }
 
-func (repo *deviceRepo) Save(ctx context.Context, device models.Device) error {
-	return errors.New("unimplemented")
+func (repo *deviceRepo) Save(ctx context.Context, device *models.Device) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO `devices` (`id`, `name`, `last_ping`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `name` = ?, `last_ping` = ?", device.ID, device.Name, device.LastPing, device.Name, device.LastPing)
+
+	return err
 }
 
 func NewDeviceRepo(db *sql.DB) *deviceRepo {
