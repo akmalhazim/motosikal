@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/akmalhazim/motosikal/repository/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
@@ -85,6 +88,26 @@ func main() {
 		}
 
 		return nil
+	})
+
+	// TODO make this platform agnostic
+	db, err := sql.Open("mysql", "root@/motosikal")
+	if err != nil {
+		panic(err)
+	}
+
+	// TODO add proper interface to adhere with SOLID principles
+	deviceRepo := mysql.NewDeviceRepo(db)
+
+	e.GET("/devices", func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		devices, err := deviceRepo.List(ctx)
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, devices)
 	})
 
 	e.POST("/surveys", func(c echo.Context) error {
