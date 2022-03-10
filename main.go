@@ -96,7 +96,7 @@ func main() {
 		return c.JSON(http.StatusOK, req)
 	})
 
-	e.POST("/records", func(c echo.Context) error {
+	e.POST("/devices/:deviceID/records", func(c echo.Context) error {
 		req := new(CreateRecordRequest)
 		if err := c.Bind(req); err != nil {
 			return err
